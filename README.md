@@ -1,6 +1,6 @@
 # sipz-site
 
-The public website for [Sipz.wine](https://sipz.wine): a single page that says what it is and that it is **invite only**, plus a privacy
+The public website for [Sipz.vin](https://sipz.vin): a single page that says what it is and that it is **invite only**, plus a privacy
 page. Plain HTML and CSS, no framework, no build step, no scripts, no tracking.
 
 This repo holds the site and the infrastructure that serves it. The app and its API live in the `sipz` repository. Accounts-wide pieces
