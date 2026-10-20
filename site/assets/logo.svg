@@ -1,0 +1,37 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024">
+  <defs>
+    <linearGradient id="wine" gradientUnits="userSpaceOnUse" x1="0" y1="380" x2="0" y2="640">
+      <stop offset="0" stop-color="#cf3a63"/>
+      <stop offset="1" stop-color="#6a102c"/>
+    </linearGradient>
+    <clipPath id="bowl">
+      <path d="M300 200 C282 400 330 560 512 610 C694 560 742 400 724 200 Z"/>
+    </clipPath>
+  </defs>
+
+  <!-- whole glass tilted as if mid-swirl, centred on the canvas -->
+  <g transform="translate(0 28) rotate(-8 512 520)">
+    <!-- wine -->
+    <g clip-path="url(#bowl)">
+      <path d="M270 372 C 360 340 430 402 512 380 C 600 356 660 322 760 360 L760 700 L270 700 Z" fill="url(#wine)"/>
+      <!-- the swirl: a spiral of wine climbing the glass -->
+      <path d="M512 540 C 600 540 648 488 634 430 C 620 372 552 356 506 384 C 466 408 462 466 500 486 C 534 504 574 482 570 446"
+            fill="none" stroke="#f4cf8a" stroke-width="17" stroke-linecap="round"/>
+      <!-- surface wave -->
+      <path d="M290 376 C 370 344 430 408 512 384 C 596 360 660 326 740 364" fill="none" stroke="#f9e2b5" stroke-width="9" stroke-linecap="round" opacity="0.85"/>
+    </g>
+
+    <!-- glass outline: bowl, stem, foot (solid colours: a gradient on a straight vertical line draws nothing) -->
+    <path d="M300 200 C282 400 330 560 512 610 C694 560 742 400 724 200" fill="none" stroke="#fbf1f4" stroke-width="24" stroke-linecap="round"/>
+    <path d="M512 610 L512 800" stroke="#fbf1f4" stroke-width="24" stroke-linecap="round"/>
+    <path d="M396 826 C 436 798 588 798 628 826" fill="none" stroke="#fbf1f4" stroke-width="24" stroke-linecap="round"/>
+    <!-- rim -->
+    <ellipse cx="512" cy="200" rx="212" ry="26" fill="none" stroke="#ffffff" stroke-width="16"/>
+    <!-- glint -->
+    <path d="M350 290 C 342 380 366 460 410 510" fill="none" stroke="#ffffff" stroke-opacity="0.6" stroke-width="15" stroke-linecap="round"/>
+  </g>
+
+  <!-- motion arcs: the swirl in the air -->
+  <path d="M196 300 C 160 400 172 520 236 600" fill="none" stroke="#f4cf8a" stroke-width="14" stroke-linecap="round" opacity="0.75"/>
+  <path d="M142 332 C 118 416 128 504 176 568" fill="none" stroke="#f4cf8a" stroke-width="10" stroke-linecap="round" opacity="0.4"/>
+</svg>

@@ -1,0 +1,156 @@
+<title>Sipz.wine site</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<style>
+/* Layout concept: a deep-wine hero that states the one fact (private journal for natural wine, invite only), four plain cards for
+   what it does, a soft band for privacy, then the invite explanation. Same copy and colours as the real site in sipz-site/site. */
+:root {
+  --bg: #faf7f2;
+  --card: #ffffff;
+  --ink: #2b2224;
+  --muted: #6b6061;
+  --wine: #7b1e3a;
+  --wine-deep: #4a1024;
+  --wine-soft: #f3e3e8;
+  --line: #e8dfd6;
+  --hero-text: #f1dde4;
+  --hero-kicker: #e0b8c6;
+  --hero-pill: rgba(255, 255, 255, 0.12);
+  --focus: #cf3a63;
+  --shadow: 0 1px 2px rgba(43, 34, 36, 0.04), 0 8px 24px rgba(43, 34, 36, 0.05);
+  --font: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #1b1417; --card: #261c20; --ink: #f2e9ec; --muted: #b9a9ae; --wine: #e58aa6; --wine-deep: #3a0c1c; --wine-soft: #2e1a22;
+    --line: #3a2a30; --hero-text: #f1dde4; --hero-kicker: #e0b8c6; --hero-pill: rgba(255, 255, 255, 0.12); --focus: #ff8fb0;
+    --shadow: 0 1px 2px rgba(0, 0, 0, 0.3), 0 8px 24px rgba(0, 0, 0, 0.25); color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #1b1417; --card: #261c20; --ink: #f2e9ec; --muted: #b9a9ae; --wine: #e58aa6; --wine-deep: #3a0c1c; --wine-soft: #2e1a22;
+  --line: #3a2a30; --hero-text: #f1dde4; --hero-kicker: #e0b8c6; --hero-pill: rgba(255, 255, 255, 0.12); --focus: #ff8fb0;
+  --shadow: 0 1px 2px rgba(0, 0, 0, 0.3), 0 8px 24px rgba(0, 0, 0, 0.25); color-scheme: dark;
+}
+
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--bg); color: var(--ink); font: 17px/1.6 var(--font); }
+a { color: var(--wine); text-underline-offset: 3px; }
+a:focus-visible { outline: 3px solid var(--focus); outline-offset: 3px; border-radius: 6px; }
+.wrap { width: min(1040px, 100%); margin-inline: auto; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+
+.hero { background: var(--wine-deep); color: #fff; border-bottom-left-radius: 32px; border-bottom-right-radius: 32px; }
+.nav { display: flex; align-items: center; justify-content: space-between; padding-block: 18px; }
+.brand { display: inline-flex; align-items: center; gap: 12px; color: #fff; text-decoration: none; font-weight: 800; font-size: 20px; }
+.brand svg { width: 40px; height: 40px; flex: none; }
+.nav-link { color: #e8cdd6; text-decoration: none; font-weight: 600; font-size: 15px; padding: 8px 4px; }
+.hero-body { padding-block: 56px 72px; max-width: 46rem; }
+.kicker { margin: 0 0 14px; color: var(--hero-kicker); font-size: 13px; font-weight: 800; letter-spacing: 0.14em; text-transform: uppercase; }
+h1 { margin: 0 0 18px; font-size: clamp(2.4rem, 7vw, 4.2rem); line-height: 1.04; letter-spacing: -0.02em; text-wrap: balance; }
+.lede { margin: 0 0 28px; font-size: clamp(1.05rem, 2.4vw, 1.25rem); color: var(--hero-text); max-width: 38em; }
+.pill { display: inline-flex; align-items: center; gap: 10px; margin: 0; padding: 10px 16px; border-radius: 999px; background: var(--hero-pill); color: #fff; font-weight: 700; font-size: 15px; }
+.dot { width: 10px; height: 10px; border-radius: 50%; background: #ff8fb0; box-shadow: 0 0 0 4px rgba(255, 143, 176, 0.25); flex: none; }
+
+.section { padding-block: 64px; }
+h2 { margin: 0 0 24px; font-size: clamp(1.6rem, 4vw, 2.2rem); line-height: 1.15; letter-spacing: -0.01em; text-wrap: balance; }
+h3 { margin: 0 0 8px; font-size: 1.15rem; color: var(--wine); }
+.grid { display: grid; gap: 18px; grid-template-columns: repeat(auto-fit, minmax(min(240px, 100%), 1fr)); }
+.card { background: var(--card); border: 1px solid var(--line); border-radius: 16px; padding: 22px; box-shadow: var(--shadow); min-width: 0; }
+.card p { margin: 0; color: var(--muted); }
+
+.band { background: var(--wine-soft); }
+.band .section { padding-block: 56px; }
+.two { display: grid; gap: 28px; grid-template-columns: repeat(auto-fit, minmax(min(280px, 100%), 1fr)); }
+.two p { margin: 0; min-width: 0; }
+
+.measure { max-width: 40em; margin: 0 0 16px; }
+.note { margin-top: 28px; padding: 16px 18px; border-left: 4px solid var(--wine); background: var(--card); border-radius: 0 12px 12px 0; max-width: 40em; }
+
+.foot { border-top: 1px solid var(--line); color: var(--muted); font-size: 15px; }
+.foot-in { display: flex; justify-content: space-between; gap: 16px; padding-block: 24px; flex-wrap: wrap; }
+.foot a { color: var(--muted); }
+
+/* the two things the page still needs from you, shown only in this mockup */
+.todo { position: sticky; bottom: 0; z-index: 5; background: var(--card); border-top: 2px solid var(--wine); box-shadow: 0 -8px 24px rgba(0, 0, 0, 0.12); padding-block: 12px calc(12px + env(safe-area-inset-bottom, 0px)); }
+.todo-in { display: flex; gap: 10px 24px; flex-wrap: wrap; align-items: baseline; font-size: 14px; }
+.todo b { color: var(--wine); letter-spacing: 0.06em; text-transform: uppercase; font-size: 12px; }
+.todo span { min-width: 0; color: var(--ink); }
+@media (max-width: 560px) { .hero-body { padding-block: 36px 52px; } .section { padding-block: 44px; } }
+@media (prefers-reduced-motion: reduce) { * { scroll-behavior: auto !important; } }
+</style>
+
+<header class="hero">
+  <nav class="wrap nav" aria-label="Main">
+    <a class="brand" href="#top">
+      <svg viewBox="0 0 1024 1024" aria-hidden="true">
+        <defs>
+          <linearGradient id="wine" gradientUnits="userSpaceOnUse" x1="0" y1="380" x2="0" y2="640"><stop offset="0" stop-color="#cf3a63"/><stop offset="1" stop-color="#6a102c"/></linearGradient>
+          <clipPath id="bowl"><path d="M300 200 C282 400 330 560 512 610 C694 560 742 400 724 200 Z"/></clipPath>
+        </defs>
+        <g transform="translate(0 28) rotate(-8 512 520)">
+          <g clip-path="url(#bowl)">
+            <path d="M270 372 C 360 340 430 402 512 380 C 600 356 660 322 760 360 L760 700 L270 700 Z" fill="url(#wine)"/>
+            <path d="M512 540 C 600 540 648 488 634 430 C 620 372 552 356 506 384 C 466 408 462 466 500 486 C 534 504 574 482 570 446" fill="none" stroke="#f4cf8a" stroke-width="17" stroke-linecap="round"/>
+            <path d="M290 376 C 370 344 430 408 512 384 C 596 360 660 326 740 364" fill="none" stroke="#f9e2b5" stroke-width="9" stroke-linecap="round" opacity="0.85"/>
+          </g>
+          <path d="M300 200 C282 400 330 560 512 610 C694 560 742 400 724 200" fill="none" stroke="#fbf1f4" stroke-width="24" stroke-linecap="round"/>
+          <path d="M512 610 L512 800" stroke="#fbf1f4" stroke-width="24" stroke-linecap="round"/>
+          <path d="M396 826 C 436 798 588 798 628 826" fill="none" stroke="#fbf1f4" stroke-width="24" stroke-linecap="round"/>
+          <ellipse cx="512" cy="200" rx="212" ry="26" fill="none" stroke="#ffffff" stroke-width="16"/>
+          <path d="M350 290 C 342 380 366 460 410 510" fill="none" stroke="#ffffff" stroke-opacity="0.6" stroke-width="15" stroke-linecap="round"/>
+        </g>
+        <path d="M196 300 C 160 400 172 520 236 600" fill="none" stroke="#f4cf8a" stroke-width="14" stroke-linecap="round" opacity="0.75"/>
+        <path d="M142 332 C 118 416 128 504 176 568" fill="none" stroke="#f4cf8a" stroke-width="10" stroke-linecap="round" opacity="0.4"/>
+      </svg>
+      <span>Sipz.wine</span>
+    </a>
+    <a class="nav-link" href="#invite">Invite only</a>
+  </nav>
+
+  <div class="wrap hero-body" id="top">
+    <p class="kicker">A tasting journal for natural wine</p>
+    <h1>Remember every bottle.</h1>
+    <p class="lede">Photograph the label, jot down what you tasted, and come back to it a year later. Sipz.wine keeps your notes, your producers and your study material in one place that works without a signal.</p>
+    <p class="pill"><span class="dot" aria-hidden="true"></span> Invite only. Not open to the public.</p>
+  </div>
+</header>
+
+<main>
+  <section class="wrap section" aria-labelledby="what">
+    <h2 id="what">What it is</h2>
+    <div class="grid">
+      <article class="card"><h3>A cellar you can search</h3><p>Every wine, every vintage, and every time you tasted it, each with its own date and notes. Search by producer, grape, region, a word from your notes, or a place you drank it.</p></article>
+      <article class="card"><h3>Photos and notes together</h3><p>Take the photo in the app, add your tasting notes, tag it, rate it. Bring in an old WhatsApp chat of bottle photos and notes and it turns into dated tastings.</p></article>
+      <article class="card"><h3>Producers on a map</h3><p>See where your wines come from, with a short note on each producer. Regions are drawn as outlines where a reliable boundary exists, and pins where it does not.</p></article>
+      <article class="card"><h3>Study alongside</h3><p>WSET Level 3 notes, grape profiles, regions by country, comparisons for grapes that look alike, and flashcards that bring a card back when you are due to forget it.</p></article>
+    </div>
+  </section>
+
+  <section class="band" aria-labelledby="private">
+    <div class="wrap section">
+      <h2 id="private">Yours, and only yours</h2>
+      <div class="two">
+        <p>Each person has their own private cellar, notes and flashcards. Nobody else can see what you have tasted, and you cannot see theirs.</p>
+        <p>Your journal lives on your phone first, so it works on a train, in a cellar, or anywhere without signal. It backs itself up in the background when you are online, and a new phone can restore everything.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="wrap section" id="invite" aria-labelledby="invite-h">
+    <h2 id="invite-h">Why it is invite only</h2>
+    <p class="measure">Sipz.wine is a small, personal project, not a public service. Access is limited to people who have been invited, and the list is checked by the server every time the app is used, not just when you sign in. If you have not been invited, you will not be able to sign in.</p>
+    <p class="measure">Know someone who is already in? Ask them. Otherwise, there is nothing to sign up for yet.</p>
+    <div class="note" role="note"><strong>Heads up.</strong> The app is not in any app store, and there is no download on this page. Invited people are sent the app directly.</div>
+  </section>
+</main>
+
+<footer class="foot">
+  <div class="wrap foot-in"><span>© 2026 Sipz.wine</span><nav aria-label="Footer"><a href="#top">Privacy</a></nav></div>
+</footer>
+
+<aside class="todo" aria-label="Open items for this mockup">
+  <div class="wrap todo-in">
+    <b>Before it goes live</b>
+    <span>1. A contact email for the privacy page (needed for deletion requests).</span>
+    <span>2. Whether to name a way to request an invite.</span>
+  </div>
+</aside>
