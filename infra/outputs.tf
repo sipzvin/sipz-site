@@ -1,13 +1,3 @@
-output "name_servers" {
-  description = "ACTION REQUIRED: set these as the name servers for the domain at your registrar. Until you do, the certificate cannot validate and the apply waits."
-  value       = var.create_zone ? aws_route53_zone.main[0].name_servers : []
-}
-
-output "zone_id" {
-  description = "Pass this to the API stack as route53_zone_id so it can add api.<domain> without owning the zone."
-  value       = local.zone_id
-}
-
 output "bucket" {
   description = "Where the files go (aws s3 sync site/ s3://<bucket> --delete)."
   value       = aws_s3_bucket.site.bucket

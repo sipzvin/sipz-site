@@ -1,7 +1,12 @@
 variable "region" {
-  description = "Region for the site bucket."
+  description = "Region for the site bucket. (The certificate is in us-east-1 regardless, because CloudFront accepts no other.)"
   type        = string
-  default     = "eu-west-2"
+  default     = "eu-west-1"
+
+  validation {
+    condition     = var.region == "eu-west-1"
+    error_message = "Everything for Sipz.wine is hosted in eu-west-1. Change this check deliberately if that ever needs to move."
+  }
 }
 
 variable "domain" {
@@ -15,16 +20,25 @@ variable "domain" {
   }
 }
 
-variable "create_zone" {
-  description = "Create the Route 53 hosted zone. Set false if the zone already exists and pass its id as existing_zone_id."
-  type        = bool
-  default     = true
+variable "route53_zone_id" {
+  description = "Id of the hosted zone for the domain. Created in sipz-foundation; take it from that stack's zone_id output."
+  type        = string
+
+  validation {
+    condition     = can(regex("^Z[A-Z0-9]{8,}$", var.route53_zone_id))
+    error_message = "route53_zone_id must look like Z0123456789ABCDEFGHIJ (the zone_id output of sipz-foundation)."
+  }
 }
 
-variable "existing_zone_id" {
-  description = "Id of an existing hosted zone for the domain. Only used when create_zone is false."
+variable "github_oidc_arn" {
+  description = "ARN of the GitHub Actions OIDC provider. Created in sipz-foundation; take it from that stack's github_oidc_arn output. Null skips the deploy role."
   type        = string
   default     = null
+
+  validation {
+    condition     = var.github_oidc_arn == null || can(regex("^arn:aws:iam::[0-9]{12}:oidc-provider/token\\.actions\\.githubusercontent\\.com$", var.github_oidc_arn))
+    error_message = "github_oidc_arn must be the ARN of the token.actions.githubusercontent.com provider."
+  }
 }
 
 variable "price_class" {
