@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://sipz.wine/sitemap.xml
+Sitemap: https://sipz.vin/sitemap.xml

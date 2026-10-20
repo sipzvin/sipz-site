@@ -30,10 +30,12 @@ test('the certificate is in us-east-1, which is the only place CloudFront accept
   assert.match(block(tf['certificate.tf'], 'resource "aws_acm_certificate_validation" "site"'), /provider\s*=\s*aws\.us_east_1/);
 });
 
-test('the hosted zone cannot be destroyed by accident, because the API depends on it too', () => {
-  assert.match(block(tf['zone.tf'], 'resource "aws_route53_zone" "main"'), /prevent_destroy\s*=\s*true/);
-  assert.match(tf['outputs.tf'], /output "zone_id"/, 'the API stack needs the id');
-  assert.match(tf['outputs.tf'], /output "name_servers"/, 'and you need these for the registrar');
+test('the site does not own the hosted zone: it takes the id from sipz-foundation, where the zone cannot be destroyed', () => {
+  assert.doesNotMatch(tf['zone.tf'], /resource "aws_route53_zone"/, 'the zone lives in sipz-foundation');
+  assert.match(tf['variables.tf'], /variable "route53_zone_id"/);
+  assert.doesNotMatch(tf['outputs.tf'], /output "name_servers"/, 'the registrar step belongs to sipz-foundation');
+  const dns = readFileSync(new URL('../../sipz-foundation/terraform/dns.tf', import.meta.url), 'utf8');
+  assert.match(block(dns, 'resource "aws_route53_zone"'), /prevent_destroy\s*=\s*true/);
 });
 
 test('the security headers are on: HSTS, no sniffing, no framing, and a policy that allows no scripts', () => {

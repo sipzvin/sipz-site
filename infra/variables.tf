@@ -5,18 +5,19 @@ variable "region" {
 
   validation {
     condition     = var.region == "eu-west-1"
-    error_message = "Everything for Sipz.wine is hosted in eu-west-1. Change this check deliberately if that ever needs to move."
+
+    error_message = "Everything for Sipz.vin is hosted in eu-west-1. Change this check deliberately if that ever needs to move."
   }
 }
 
 variable "domain" {
   description = "The apex domain the site is served on."
   type        = string
-  default     = "sipz.wine"
+  default     = "sipz.vin"
 
   validation {
     condition     = can(regex("^[a-z0-9]([a-z0-9-]*[a-z0-9])?(\\.[a-z0-9]([a-z0-9-]*[a-z0-9])?)+$", var.domain))
-    error_message = "domain must be a bare domain name such as sipz.wine, with no scheme or path."
+    error_message = "domain must be a bare domain name such as sipz.vin, with no scheme or path."
   }
 }
 

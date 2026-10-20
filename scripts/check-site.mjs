@@ -19,7 +19,7 @@ for (const f of pages) {
   if (f !== '404.html') need(/<meta name="description" content="[^"]{20,}/.test(html), 'no description');
   need(!/CONTACT_EMAIL_HERE|TODO|FIXME|lorem ipsum/i.test(html), 'a placeholder is still in the page');
   need(!/<script[^>]+src=["']https?:/i.test(html), 'loads a script from another site');
-  need(!/<link[^>]+href=["']https?:\/\/(?!sipz\.wine)/i.test(html), 'loads a stylesheet from another site');
+  need(!/<link[^>]+href=["']https?:\/\/(?!sipz\.vin)/i.test(html), 'loads a stylesheet from another site');
   need((html.match(/<h1\b/g) ?? []).length === 1, 'should have exactly one h1');
   for (const m of html.matchAll(/<img\b[^>]*>/g)) need(/\balt=/.test(m[0]), `image with no alt text: ${m[0].slice(0, 60)}`);
   // every local reference resolves to a real file
@@ -43,7 +43,7 @@ for (const f of pages) {
 }
 for (const f of ['robots.txt', 'sitemap.xml', 'style.css', 'favicon.png']) if (!existsSync(join(root, f))) problems.push(`missing ${f}`);
 const sitemap = existsSync(join(root, 'sitemap.xml')) ? readFileSync(join(root, 'sitemap.xml'), 'utf8') : '';
-for (const m of sitemap.matchAll(/<loc>https:\/\/sipz\.wine\/([^<]*)<\/loc>/g)) if (m[1] && !existsSync(join(root, m[1]))) problems.push(`sitemap lists /${m[1]}, which does not exist`);
+for (const m of sitemap.matchAll(/<loc>https:\/\/sipz\.vin\/([^<]*)<\/loc>/g)) if (m[1] && !existsSync(join(root, m[1]))) problems.push(`sitemap lists /${m[1]}, which does not exist`);
 const total = files.reduce((n, f) => n + statSync(f).size, 0);
 if (total > 1_000_000) problems.push(`the site is ${(total / 1024).toFixed(0)} KB; a page like this should be well under 1 MB`);
 
