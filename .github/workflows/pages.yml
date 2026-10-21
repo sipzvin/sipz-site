@@ -1,5 +1,7 @@
-# Publishes site/ to GitHub Pages on every push to main. (Touched after the repository went public so GitHub re-reads it.) The check runs first: a broken link, a missing alt text, a script that the page's own
+# Publishes site/ to GitHub Pages on every push to main. The check runs first: a broken link, a missing alt text, a script that the page's own
 # policy would block, or a leftover placeholder (such as the contact email) stops the deploy.
+# Needs Settings > Actions > General to allow GitHub-owned actions (checkout, setup-node and the three Pages actions are all GitHub's own).
+# With the policy on "local only", GitHub does not list this workflow at all, which looks like "no workflows" rather than an error.
 name: Deploy site
 
 on:
