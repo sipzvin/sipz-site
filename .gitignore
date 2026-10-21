@@ -1,12 +1,2 @@
-# Terraform: provider plugins are downloaded, and state and variable files can hold account details. Never commit these.
-**/.terraform/
-*.tfstate
-*.tfstate.*
-*.tfvars
-*.tfvars.json
-crash.log
-override.tf
-override.tf.json
-*_override.tf
-
 .DS_Store
+node_modules/

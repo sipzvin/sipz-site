@@ -30,17 +30,21 @@ for (const f of pages) {
     need(ref === '/' || existsSync(target), `links to ${ref}, which does not exist`);
   }
 }
-// The CloudFront policy (infra/site.tf) forbids scripts, styles from elsewhere and inline styles. A page that breaks those rules
-// would be silently blocked in production while looking fine here, so catch it before deploy.
-const tf = readFileSync(new URL('../infra/site.tf', import.meta.url), 'utf8');
-const csp = /content_security_policy = "([^"]+)"/.exec(tf)?.[1] ?? '';
-if (!csp) problems.push('infra/site.tf has no content security policy');
+// GitHub Pages cannot set response headers, so the Content-Security-Policy travels in a <meta> tag on every page. This checks the tag is there
+// and that each page obeys it. A page that breaks its own policy would be silently blocked in the browser while looking fine here.
+// (frame-ancestors cannot be set from a meta tag at all, only as a header, so framing cannot be forbidden on this host.)
 for (const f of pages) {
   const html = readFileSync(join(root, f), 'utf8');
-  if (/script-src 'none'/.test(csp) && /<script\b/i.test(html)) problems.push(`${f}: has a <script>, but the CloudFront policy says script-src 'none', so it would be blocked`);
-  if (/style-src 'self'/.test(csp) && (/<style\b/i.test(html) || /\sstyle=/i.test(html))) problems.push(`${f}: has inline styles, but the policy says style-src 'self'`);
-  if (/\son[a-z]+=/i.test(html)) problems.push(`${f}: has an inline event handler, which the policy blocks`);
+  const csp = /<meta http-equiv="Content-Security-Policy" content="([^"]+)"/.exec(html)?.[1] ?? '';
+  if (!csp) { problems.push(`${f}: has no Content-Security-Policy meta tag`); continue; }
+  if (/frame-ancestors/.test(csp)) problems.push(`${f}: frame-ancestors in a meta tag is ignored by browsers; remove it so nobody thinks framing is blocked`);
+  if (/script-src 'none'/.test(csp) && /<script\b/i.test(html)) problems.push(`${f}: has a <script>, but its policy says script-src 'none', so it would be blocked`);
+  if (/style-src 'self'/.test(csp) && (/<style\b/i.test(html) || /\sstyle=/i.test(html))) problems.push(`${f}: has inline styles, but its policy says style-src 'self'`);
+  if (/\son[a-z]+=/i.test(html)) problems.push(`${f}: has an inline event handler, which its policy blocks`);
 }
+// .nojekyll stops Pages running Jekyll over the folder. (No CNAME file: when deploying with an Actions workflow, GitHub ignores it. The custom
+// domain is set in the repository's Pages settings.)
+if (!existsSync(join(root, '.nojekyll'))) problems.push('missing .nojekyll');
 for (const f of ['robots.txt', 'sitemap.xml', 'style.css', 'favicon.png']) if (!existsSync(join(root, f))) problems.push(`missing ${f}`);
 const sitemap = existsSync(join(root, 'sitemap.xml')) ? readFileSync(join(root, 'sitemap.xml'), 'utf8') : '';
 for (const m of sitemap.matchAll(/<loc>https:\/\/sipz\.vin\/([^<]*)<\/loc>/g)) if (m[1] && !existsSync(join(root, m[1]))) problems.push(`sitemap lists /${m[1]}, which does not exist`);

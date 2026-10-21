@@ -1,18 +1,17 @@
 # sipz-site
 
 The public website for [Sipz.vin](https://sipz.vin): a single page that says what it is and that it is **invite only**, plus a privacy
-page. Plain HTML and CSS, no framework, no build step, no scripts, no tracking.
+page. Plain HTML and CSS, no framework, no build step, no scripts, no tracking. Published with **GitHub Pages**.
 
-This repo holds the site and the infrastructure that serves it. The app and its API live in the `sipz` repository. Accounts-wide pieces
-(the DNS zone, the GitHub OIDC provider) live in `sipz-foundation`; see [Where things live](#where-things-live).
+The app and its API live in the `sipz` repository; account-wide AWS pieces live in `sipz-foundation`.
 
 ## Layout
 
 ```
-site/           what gets published: index.html, privacy.html, 404.html, style.css, assets/, robots.txt, sitemap.xml
-mockup/         a standalone preview of the home page (open it in a browser; not deployed)
-scripts/        check-site.mjs: checks the pages before a deploy
-infra/          Terraform: private S3 bucket, CloudFront, certificate, DNS records, and a GitHub deploy role
+site/                what gets published: index.html, privacy.html, 404.html, style.css, assets/, robots.txt, sitemap.xml
+mockup/              a standalone preview of the home page (open it in a browser; not deployed)
+scripts/             check-site.mjs: checks the pages before a deploy
+.github/workflows/   pages.yml: checks, then publishes site/ on every push to main
 ```
 
 ## Edit the site
@@ -27,67 +26,49 @@ It fails if any of these are wrong, because each would only show up after deploy
 - a link, image, stylesheet or sitemap entry points at a file that does not exist
 - a page is missing a title, a description, a language or the mobile viewport tag
 - there is not exactly one `<h1>`, or an image has no alt text
-- the page loads something from another site, or contains a script, inline style or event handler. The CloudFront policy in
-  `infra/site.tf` blocks all of those, so a page that does would look fine here and break in production
+- a page has no Content-Security-Policy `<meta>` tag, or breaks its own policy (a script, an inline style or an event handler)
+- the page loads something from another site
 - a placeholder such as `CONTACT_EMAIL_HERE` is still in a page
 
-**It currently fails on purpose.** `site/privacy.html` needs a real contact email for deletion requests before this can go live.
+**It currently fails on purpose.** `site/privacy.html` needs a real contact email for deletion requests before this can go live. The
+deploy workflow runs the same check first, so nothing with a placeholder can be published.
 
-## Infrastructure
+## Publish it (once)
 
-`infra/` creates, in one AWS region (`eu-west-1`, plus `us-east-1` for the certificate only, because CloudFront accepts no other):
+1. **Repository visibility.** GitHub Pages from a *private* repository needs a paid GitHub plan (the documentation mentions Enterprise Cloud; I
+   could not confirm anything about other plans). On the free plan the repository has to be **public**. Everything in it is meant to be
+   public anyway; check there is nothing in the history you would not want seen first.
+2. **Settings → Pages → Source: GitHub Actions.**
+3. **Settings → Pages → Custom domain: `sipz.vin`.** Do this **before** step 4. GitHub's documentation warns that creating the DNS records first
+   can let someone else claim the domain on GitHub in between.
+4. **DNS** (wherever the domain's DNS is hosted; see below):
 
-| Resource | Notes |
-| --- | --- |
-| S3 bucket | Private. Only this CloudFront distribution can read it, over TLS. Versioned, so a bad deploy can be undone. |
-| CloudFront | HTTPS only, HTTP/3, security headers (HSTS, no framing, no sniffing, a policy that allows no scripts). `www` redirects to the bare domain. |
-| ACM certificate | For the bare domain and `www`, validated through DNS. |
-| Route 53 records | Point the domain at CloudFront. The hosted zone itself is created in `sipz-foundation`. |
-| Deploy role | Lets GitHub Actions publish **without stored AWS keys** (OIDC). Only this repo's `main` branch can assume it, and it can only copy files to the bucket and clear the CDN cache. |
+   | Name | Type | Value |
+   | --- | --- | --- |
+   | `sipz.vin` | A | `185.199.108.153`, `185.199.109.153`, `185.199.110.153`, `185.199.111.153` |
+   | `sipz.vin` | AAAA (optional) | `2606:50c0:8000::153`, `2606:50c0:8001::153`, `2606:50c0:8002::153`, `2606:50c0:8003::153` |
+   | `www.sipz.vin` | CNAME | `sipzvin.github.io` |
 
-```bash
-cd infra
-terraform init
-terraform validate
-terraform plan        # nothing exists until you apply
-```
+   Those addresses are from GitHub's own documentation for custom domains; check them there before relying on them, as they can change.
+   With both the apex and `www` set up, GitHub redirects between them.
+5. **Settings → Pages → Enforce HTTPS**, once GitHub offers it (it can take up to 24 hours after DNS is correct).
+6. Push to `main`. The workflow checks the site and publishes it.
 
-> **Nothing here has been planned or applied.** Check which account you are in (`aws sts get-caller-identity`) before running
-> `plan` or `apply`. The Terraform never sets a profile or account id; it uses whatever your environment points at.
+### Where the DNS lives
+Either works; this is your call.
+- **At the registrar** (Namecheap): add the records above in its DNS settings. Simplest, and nothing in AWS is involved for the site.
+- **In Route 53**, in the zone `sipz-foundation` creates: add the same records there, and set the name servers at the registrar to the zone's.
+  Worth it if the API will also live on `sipz.vin` (for example `api.sipz.vin`) and you want all the records in one place.
 
-Run the file checks any time without touching AWS: `node --test infra/infra.test.mjs`. They confirm the properties `validate` cannot see:
-the bucket is never public, the deploy role cannot be assumed by any other repo or branch, the certificate is in `us-east-1`, and the
-security headers are present.
+## What GitHub Pages cannot do (compared with the S3 + CloudFront setup this replaced)
 
-### Going live, in order
-
-1. Create `sipz-foundation` first (it owns the hosted zone and the OIDC provider) and apply it.
-2. **Point the domain at Route 53:** copy the `name_servers` output into your registrar. The certificate cannot validate until you do.
-3. Fill in the contact email in `site/privacy.html` and run `node scripts/check-site.mjs`.
-4. Apply `infra/` with `github_repo = "nicolasarnold12321/sipz-site"`.
-5. Deploy the files:
-
-   ```bash
-   aws s3 sync site/ "s3://$(terraform -chdir=infra output -raw bucket)" --delete
-   aws cloudfront create-invalidation --distribution-id "$(terraform -chdir=infra output -raw distribution_id)" --paths '/*'
-   ```
-
-   After step 4, a GitHub Actions workflow can do this for you using the `deploy_role_arn` output. No access keys are stored anywhere.
-
-## Where things live
-
-| Repo | Holds |
-| --- | --- |
-| `sipz` | The Android app, the API (`server/`), the contract they share (`shared/`), and the API's own infrastructure |
-| `sipz-site` (this repo) | The website and its S3 / CloudFront stack |
-| `sipz-foundation` | Things that belong to the whole AWS account rather than to one app: the DNS zone, the GitHub OIDC provider, and (optionally) a VPC |
-
-The zone and the OIDC provider are in `sipz-foundation` so that deleting the site or the API can never take DNS or the other's deploys
-with it. This repo and the API both read the zone's id from it.
+The previous setup (a private S3 bucket behind CloudFront, written in Terraform and never applied) is gone from this repo. The differences:
+- **No response headers.** The old setup sent HSTS and a `frame-ancestors 'none'` policy. Pages cannot set headers, so the Content-Security-Policy is
+  now a `<meta>` tag on each page, and **`frame-ancestors` cannot be set that way at all**: the site could be shown inside someone else's frame.
+  For a page with no login, form or script, the practical risk is small. "Enforce HTTPS" covers the transport side.
+- **Public repository** on the free plan, as above.
 
 ## Not done yet
-
-- A contact email on the privacy page (the check above blocks a deploy until it is real)
-- A GitHub Actions workflow to deploy on push to `main`
+- A contact email on the privacy page (the check blocks a deploy until it is real)
 - A way to request an invite; the page currently says to ask someone who is already in
 - No analytics, deliberately
